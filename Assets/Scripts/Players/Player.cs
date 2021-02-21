@@ -60,34 +60,15 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Handles player movement
     /// </summary>
-    public void PlayerMovement(string vert, string hori)
+    public void PlayerMovement(int vert, int hori)
     {
-        switch (vert)
-        {
-            case "1":
-                movement = new Vector3(0, 0, 1);
-                break;
-            case "-1":
-                movement = new Vector3(0, 0, -1);
-                break;
-            default:
-                break;
-        }
+        print($"Player being moved with hori:{hori} and vert{vert}");
+        movement = new Vector3(0, 0, vert);
 
         transform.Translate(movement * Time.deltaTime * speed, Space.Self);
 
 
-        switch (hori)
-        {
-            case "1":
-                rotation = new Vector3(0, 0, 1);
-                break;
-            case "-1":
-                rotation = new Vector3(0, 0, -1);
-                break;
-            default:
-                break;
-        }
+        rotation = new Vector3(0, 0, hori);
 
         transform.Rotate(rotation * Time.deltaTime * rotateSpeed);
     }

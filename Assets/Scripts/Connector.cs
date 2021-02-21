@@ -6,51 +6,69 @@ using UnityEngine;
 public class Connector : MonoBehaviour
 {
     [SerializeField] Player[] playerArr = new Player[4];
-    [SerializeField] Dictionary<string, Player> playerList = new Dictionary<string, Player>();
-    [DllImport("__Internal")] private static extern string[,] GetInput();
-
-    bool idCreated = false;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [DllImport("__Internal")] private static extern string GetInput();
 
     // Update is called once per frame
     void Update()
     {
-        GetPlayerInputs();
+        GetPlayerInputs(GetInput());
     }
 
-    void GetPlayerInputs()
+    void GetPlayerInputs(string json)
     {
-        string[,] inputs = GetInput();
-        for (int i = 0; i < inputs.Length; i++)
+        print($"getting player inputs: {json}");
+        JsonArray arr = JsonUtility.FromJson<JsonArray>(json);
+        foreach (var obj in arr.inputs)
         {
-            if(!idCreated)
+            ApplyMovement(obj.id, obj.vertical, obj.horizontal, obj.action); 
+        }
+    }
+
+    void ApplyMovement(string id, int forward, int right, int action)
+    {
+        print($"applying movement with id{id}, vert{forward}, hori{right}, action{action}");
+        Player player = new Player();
+        for (int i = 0; i < playerArr.Length; i++)
+        {
+            if (id == playerArr[i].id)
             {
-                CreatePlayer(inputs[i, 0], i);
+                player = playerArr[i];
+                print(player);
             }
-            // Input comes in as [{id=123, forward=1, horizontal=-1, action=0},...]
-            ApplyMovement(inputs[i, 0], inputs[i, 1], inputs[i, 2], inputs[i, 3]);
         }
-    }
-
-    void ApplyMovement(string id, string forward, string right, string action)
-    {
-        GameObject player = playerList[id].gameObject;
-        //player.GetComponent<Player>().MovePlayer();
         // Call a movement function from Player script to move that specific player.
-        player.GetComponent<Player>().PlayerMovement(forward, right);
-        if (action == "1")
+        player.PlayerMovement(forward, right);
+        if (action == 1)
         {
-            player.GetComponent<Player>().Fire();
+            print("Firing");
+            player.Fire();
         }
     }
 
-    void CreatePlayer(string id, int i)
+    void CreatePlayer(string id)
     {
-        playerArr[i].GetComponent<Player>().id = id;
+        print("Create Player has been called!");
+
+        foreach (var obj in playerArr)
+        {
+            if (obj.id == null)
+            {
+                obj.id = id;
+                return;
+            }
+        }
+    }
+
+    public class JsonObject
+    {
+        public string id;
+        public int horizontal;
+        public int vertical;
+        public int action;
+    }
+
+    public class JsonArray
+    {
+        public JsonObject[] inputs;
     }
 }
