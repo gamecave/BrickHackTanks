@@ -13,7 +13,13 @@ public class Player : MonoBehaviour
 
     public int Health { get => _health; set => _health = value; }
 
-    
+    public string id;
+
+    [SerializeField] GameObject bullet;
+    [SerializeField] GameObject firePos;
+    float fireRate = 1.0f;
+    float fireTimer = 0.0f;
+    bool canFire = true;
 
     // Start is called before the first frame update
     void Start()
@@ -24,18 +30,65 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        PlayerMovement();
+        fireTimer += Time.deltaTime;
+
+        if (fireTimer >= fireRate)
+        {
+            canFire = true;
+        }
+        else
+        {
+            canFire = false;
+        }
+
+    }
+
+    public void Fire()
+    {
+        if (canFire)
+        {
+            Instantiate(bullet, firePos.transform.position, firePos.transform.rotation);
+            canFire = false;
+            fireTimer = 0.0f;
+        }
+        else
+        {
+            return;
+        }
     }
 
     /// <summary>
     /// Handles player movement
     /// </summary>
-    void PlayerMovement()
-    { 
-        movement = new Vector3(0, 0, Input.GetAxis("Vertical"));
+    public void PlayerMovement(string vert, string hori)
+    {
+        switch (vert)
+        {
+            case "1":
+                movement = new Vector3(0, 0, 1);
+                break;
+            case "-1":
+                movement = new Vector3(0, 0, -1);
+                break;
+            default:
+                break;
+        }
+
         transform.Translate(movement * Time.deltaTime * speed, Space.Self);
 
-        rotation = new Vector3(0, Input.GetAxis("Horizontal"), 0);
+
+        switch (hori)
+        {
+            case "1":
+                rotation = new Vector3(0, 0, 1);
+                break;
+            case "-1":
+                rotation = new Vector3(0, 0, -1);
+                break;
+            default:
+                break;
+        }
+
         transform.Rotate(rotation * Time.deltaTime * rotateSpeed);
     }
 
